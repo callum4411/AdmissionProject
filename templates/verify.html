@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Enter Verification Code</h2>
+<form method="POST">
+    <input type="text" name="code" placeholder="Enter the 6-digit code" required>
+    <button type="submit">Verify and Login</button>
+</form>
+{% endblock %}

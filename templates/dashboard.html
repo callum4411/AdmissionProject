@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Welcome {{ user }}</h2>
+<p>Document Status:</p>
+<ul>
+    {% for doc, uploaded in documents.items() %}
+        <li>{{ doc }}: {{ '✅ Submitted' if uploaded else '❌ Missing' }}</li>
+    {% endfor %}
+</ul>
+<a href="{{ url_for('logout') }}">Logout</a>
+{% endblock %}
