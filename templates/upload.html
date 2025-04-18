@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block content %}
+<h2>Upload Your Documents</h2>
 
-</body>
-</html>
+<form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+    <label>Passport:</label>
+    <input type="file" name="passport"><br><br>
+
+    <label>Vaccine Card:</label>
+    <input type="file" name="vaccine_card"><br><br>
+
+    <label>Emirates ID:</label>
+    <input type="file" name="emirates_id"><br><br>
+
+    <label>Residence Visa:</label>
+    <input type="file" name="residence_visa"><br><br>
+
+    <button type="submit">Upload Documents</button>
+</form>
+{% endblock %}
