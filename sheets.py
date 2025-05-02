@@ -19,8 +19,9 @@ def get_all_students():
 
 # 4. Get a single student's record by email
 def get_student_by_email(email):
-    records = get_all_students()
-    for record in records:
-        if record['Email'].strip().lower() == email.strip().lower():
-            return record
-    return None
+    rows = sheet.get_all_records()
+    for index, row in enumerate(rows):
+        if row['Email'].strip().lower() == email.strip().lower():
+            return row, index + 2  # +2 to match Google Sheets' 1-based indexing
+    return None, None
+

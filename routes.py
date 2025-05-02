@@ -70,19 +70,28 @@ def dashboard():
         return redirect(url_for('login'))
 
     # ✅ Fetch row from Google Sheet
-    row = get_student_by_email(session['user'])
+    row, _ = get_student_by_email(session['user'])  # ✅ Fixes tuple unpacking issue
+
 
     if not row:
         flash("Your email was not found in the admissions sheet.", "error")
         return redirect(url_for('logout'))
 
     # ✅ Build document link/status dictionary
+    grade_level = int(row.get('Grade', 0))
+
     documents = {
-        'Passport': row.get('Passport'),
-        'Vaccine Card': row.get('Vaccine Card'),
-        'Emirates ID': row.get('Emirates ID'),
-        'Residence Visa': row.get('Residence Visa')
+        'School Transfer Certificate': row.get('School Transfer Certificate'),
+        'Emirates ID/Diplomatic ID': row.get('Emirates ID/Diplomatic ID'),
+        'Emirates ID Declaration Letter and Undertaking Form': row.get(
+            'Emirates ID Declaration Letter and Undertaking Form'),
+        'Official Copy of the Final Report Card for previous year': row.get(
+            'Official Copy of the Final Report Card for previous year')
     }
+
+    # Only show transcript field for grades 10–12
+    if grade_level >= 10:
+        documents['Official Copy of Transcript'] = row.get('Official Copy of Transcript')
 
     return render_template('dashboard.html', user=session['user'], documents=documents)
 @app.route('/logout')
@@ -96,42 +105,51 @@ def upload():
     if 'user' not in session:
         return redirect(url_for('login'))
 
+    # Define all documents
+    fields = {
+        'transfer_certificate': 'School Transfer Certificate',
+        'emirates_id': 'Emirates ID/Diplomatic ID',
+        'declaration_letter': 'Emirates ID Declaration Letter and Undertaking Form',
+        'report_card': 'Official Copy of the Final Report Card for previous year',
+        'transcript': 'Official Copy of Transcript'
+    }
+
+    # Get student data
+    row, row_index = get_student_by_email(session['user'])
+    if not row:
+        flash("Student not found.", "error")
+        return redirect(url_for('dashboard'))
+
+    student_name = row.get('Student Name')
+    grade_level = int(row.get('Grade', 0))
+
+    # Remove transcript if under grade 10
+    if grade_level < 10:
+        fields.pop('transcript', None)
+
     if request.method == 'POST':
-        # Dictionary to map form field names to display names and Google Sheet keys
-        fields = {
-            'passport': 'Passport',
-            'vaccine_card': 'Vaccine Card',
-            'emirates_id': 'Emirates ID',
-            'residence_visa': 'Residence Visa'
-        }
-
-        uploaded_files = {}
-
         upload_success = False
 
         for field, doc_label in fields.items():
             file = request.files.get(field)
+            print(f"[DEBUG] Checking field '{field}' → file: {file.filename if file else 'None'}")
+
             if file and file.filename:
                 save_path = os.path.join('uploads', session['user'], file.filename)
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 file.save(save_path)
+                print(f"[DEBUG] Saved file to {save_path}")
 
                 try:
-                    # Upload to Google Drive
-                    drive_link = upload_file_to_drive(save_path, session['user'], doc_label)
+                    drive_link = upload_file_to_drive(save_path, student_name, doc_label)
+                    print(f"[DEBUG] Uploaded to Drive: {drive_link}")
 
-                    # Update Google Sheet
-                    row = get_student_by_email(session['user'])
-                    if row:
-                        row_index = get_all_students().index(row) + 2
-                        col_index = list(row.keys()).index(doc_label) + 0
-                        sheet.update_cell(row_index, col_index, 'TRUE')
-                        sheet.update_cell(row_index, col_index + 1, drive_link)
-
+                    col_index = list(row.keys()).index(doc_label) + 1
+                    sheet.update_cell(row_index, col_index, drive_link)
                     upload_success = True
 
                 except Exception as e:
-                    print(f"Error uploading {doc_label}: {e}")
+                    print(f"[ERROR] Upload failed for {doc_label}: {e}")
                     flash(f"Failed to upload {doc_label}.", "error")
 
         if upload_success:
@@ -141,4 +159,11 @@ def upload():
 
         return redirect(url_for('dashboard'))
 
-    return render_template('upload.html')
+    # For GET — show only missing docs
+    missing_docs = {
+        field: label
+        for field, label in fields.items()
+        if not row.get(label)
+    }
+
+    return render_template('upload.html', missing_docs=missing_docs)

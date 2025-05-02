@@ -1,9 +1,77 @@
+.body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7fa;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+h2 {
+    color: #2c3e50;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+/* Flash messages */
+.flashes {
+    margin-bottom: 20px;
+    padding: 0;
+}
+
 .flash.success {
-    color: green;
-    margin: 1em 0;
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 5px solid #28a745;
+    padding: 10px;
+    margin-bottom: 10px;
 }
 
 .flash.error {
-    color: red;
-    margin: 1em 0;
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 5px solid #dc3545;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Upload form styling */
+form label {
+    display: block;
+    margin: 12px 0 4px;
+    font-weight: bold;
+}
+
+form input[type="file"] {
+    display: block;
+    margin-bottom: 10px;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #2980b9;
 }

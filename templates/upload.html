@@ -3,18 +3,15 @@
 <h2>Upload Your Documents</h2>
 
 <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
-    <label>Passport:</label>
-    <input type="file" name="passport"><br><br>
-
-    <label>Vaccine Card:</label>
-    <input type="file" name="vaccine_card"><br><br>
-
-    <label>Emirates ID:</label>
-    <input type="file" name="emirates_id"><br><br>
-
-    <label>Residence Visa:</label>
-    <input type="file" name="residence_visa"><br><br>
-
-    <button type="submit">Upload Documents</button>
+    {% if missing_docs %}
+        {% for field, label in missing_docs.items() %}
+            <label for="{{ field }}">{{ label }}:</label>
+            <input type="file" name="{{ field }}" id="{{ field }}"><br><br>
+        {% endfor %}
+        <button type="submit">Upload Documents</button>
+    {% else %}
+        <p>✅ All documents are already submitted. No uploads needed!</p>
+    {% endif %}
 </form>
+
 {% endblock %}
